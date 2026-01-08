@@ -39,7 +39,7 @@ class ArticleModel {
       link: item.link ?? '',
       description: cleanText(item.description),
       category: item.categories?.isNotEmpty == true
-          ? item.categories!.firs.value
+          ? item.categories!.first.value
           : "Новости",
       pubDate: item.pubDate,
     );

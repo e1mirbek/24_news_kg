@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:news24_kg/models/article_model.dart';
 import 'package:news24_kg/theme/app_colors.dart';
 import 'package:news24_kg/widgets/app_icon_button.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +14,27 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  bool _isScrolled = false;
+
+  /// логика шторки при нажатий
+  void _showNewsDetails(BuildContext context, ArticleModel article) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          builder: (context, scrollControllerer) {
+            return Container(
+              padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+              decoration: BoxDecoration(color: AppColors.red),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -21,6 +43,24 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<NewsProvider>(context, listen: false).fetchNews();
     });
+
+    _scrollController.addListener(() {
+      if (_scrollController.offset > 1 && !_isScrolled) {
+        setState(() {
+          _isScrolled = true;
+        });
+      } else if (_scrollController.offset <= 1 && _isScrolled) {
+        setState(() {
+          _isScrolled = false;
+        });
+      }
+    });
+
+    @override
+    void dispose() {
+      _scrollController.dispose();
+      super.dispose();
+    }
   }
 
   String _formatDate(DateTime? date) {
@@ -37,56 +77,120 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.background,
       appBar: _appBar(),
       body: Consumer<NewsProvider>(
-        builder: (context, newsProvider, child) {
+        builder: (context, provider, child) {
           // 1. Если загрузка
-          if (newsProvider.isLoading) {
+          if (provider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
           // 2. Если ошибка
-          if (newsProvider.errorMessage.isNotEmpty) {
-            return Center(child: Text('Ошибка: ${newsProvider.errorMessage}'));
+          if (provider.errorMessage.isNotEmpty) {
+            return Center(child: Text('Ошибка: ${provider.errorMessage}'));
           }
 
           // 3. Если пусто
-          if (newsProvider.articles.isEmpty) {
+          if (provider.articles.isEmpty) {
             return const Center(child: Text('Новостей нет'));
           }
 
           // 4. Вывод списка
-          return ListView.builder(
-            itemCount: newsProvider.articles.length,
-            itemBuilder: (context, index) {
-              final article = newsProvider.articles[index];
-              return Card(
-                margin: const EdgeInsets.all(8),
-                child: ListTile(
-                  title: Text(
-                    article.title,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 50.0,
+                  child: ListView.builder(
+                    itemCount: provider.categories.length,
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, index) {
+                      final category = provider.categories[index];
+                      final isSelected = category == provider.selectedCategory;
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isSelected
+                                ? AppColors.red
+                                : AppColors.backgroundCard,
+                            foregroundColor: isSelected
+                                ? AppColors.white
+                                : AppColors.black,
+                          ),
+                          onPressed: () => provider.changeCategory(category),
+                          child: Center(
+                            child: Text(
+                              category,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 5),
-                      Text(
-                        _formatDate(article.pubDate),
-                      ), // Потом отформатируем красиво
-                      const SizedBox(height: 5),
-                      Text(
-                        article.description.replaceAll(
-                          RegExp(r'<[^>]*>'),
-                          '',
-                        ), // Убираем HTML теги из описания
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                  isThreeLine: true,
                 ),
-              );
-            },
+                const SizedBox(height: 20.0),
+                Expanded(
+                  child: ShaderMask(
+                    blendMode: BlendMode.dstIn,
+                    shaderCallback: (Rect bounds) {
+                      return LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: _isScrolled
+                            ? [
+                                AppColors.background,
+                                Colors.white70,
+                                Colors.white24,
+                              ]
+                            : [Colors.white, Colors.white70, Colors.white24],
+                        stops: [0.0, 0.85, 1.0],
+                      ).createShader(bounds);
+                    },
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: provider.articles.length,
+                      itemBuilder: (context, index) {
+                        final article = provider.articles[index];
+                        return InkWell(
+                          onTap: () => _showNewsDetails(context, article),
+                          child: Card(
+                            margin: const EdgeInsets.all(8),
+                            child: ListTile(
+                              title: Text(
+                                article.title,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    _formatDate(article.pubDate),
+                                  ), // Потом отформатируем красиво
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    article.description.replaceAll(
+                                      RegExp(r'<[^>]*>'),
+                                      '',
+                                    ), // Убираем HTML теги из описания
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                              isThreeLine: true,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),

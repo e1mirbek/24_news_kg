@@ -9,7 +9,9 @@ class NewsProvider extends ChangeNotifier {
 
   List<ArticleModel> _allArticles = [];
   List<String> _categories = ['Все'];
-  String _selectedCategories = 'Все';
+  String _selectedCategory = 'Все';
+
+  /// список категорий новостей
   final List<String> _categoryOrder = [
     'Все',
     'Власть',
@@ -35,7 +37,7 @@ class NewsProvider extends ChangeNotifier {
 
   List<String> get categories => _categories;
 
-  String get selectedCategories => _selectedCategories;
+  String get selectedCategory => _selectedCategory;
 
   List<String> get categoryOrder => _categoryOrder;
 
@@ -81,16 +83,21 @@ class NewsProvider extends ChangeNotifier {
     }
   }
 
+  void changeCategory(String newCategory) {
+    _selectedCategory = newCategory;
+    notifyListeners();
+  }
+
   /// логика фильтраций
   /// Если выбрано "Все" -> отдаем весь список.
   /// Если выбрано другая категория -> отдаем только статьи с определенными новостями.
 
   List<ArticleModel> get articles {
-    if (_selectedCategories == 'Все') {
+    if (_selectedCategory == 'Все') {
       return _allArticles;
     }
     return _allArticles
-        .where((article) => article.category == _selectedCategories)
+        .where((article) => article.category == _selectedCategory)
         .toList();
   }
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:news24_kg/models/article_model.dart';
-import 'package:news24_kg/theme/app_colors.dart';
-import 'package:news24_kg/widgets/app_icon_button.dart';
+import 'package:news24_kg/data/models/article_model.dart';
+import 'package:news24_kg/core/theme/app_colors.dart';
+import 'package:news24_kg/ui/widgets/app_icon_button.dart';
 import 'package:provider/provider.dart';
-import '../providers/news_provider.dart';
+import '../../controller/providers/news_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -80,7 +80,9 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context, provider, child) {
           // 1. Если загрузка
           if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.red),
+            );
           }
 
           // 2. Если ошибка
@@ -229,15 +231,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const Spacer(),
           AppIconButton(
-            icon: Icons.refresh_outlined,
-            color: AppColors.grey,
-            onPressed: () =>
-                Provider.of<NewsProvider>(context, listen: false).fetchNews(),
+            icon: "assets/icons/refresh.png",
+            onPressed: () {
+              Provider.of<NewsProvider>(context, listen: false).fetchNews();
+            },
           ),
-          AppIconButton(
-            icon: Icons.notifications_outlined,
-            color: AppColors.grey,
-          ),
+          AppIconButton(icon: 'assets/icons/notifications.png'),
         ],
       ),
     );

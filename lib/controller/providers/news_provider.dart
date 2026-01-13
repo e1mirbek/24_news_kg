@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:news24_kg/models/article_model.dart';
-import 'package:news24_kg/services/rss_service.dart';
+import 'package:news24_kg/data/models/article_model.dart';
+import 'package:news24_kg/data/services/rss_service.dart';
 
 class NewsProvider extends ChangeNotifier {
   final RssService _rssService = RssService();

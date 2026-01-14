@@ -14,10 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        // Подключаем наш NewsProvider
-        ChangeNotifierProvider(create: (_) => NewsProvider()),
-      ],
+      providers: [ChangeNotifierProvider(create: (_) => NewsProvider())],
       child: MaterialApp(
         title: 'News KG',
         theme: ThemeData(

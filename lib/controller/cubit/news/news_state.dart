@@ -1,18 +1,16 @@
 import 'package:equatable/equatable.dart';
+import 'package:news24_kg/data/models/article_model.dart';
 
-import '../../../data/models/article_model.dart';
-
-class NewsState extends Equatable {
+abstract class NewsState extends Equatable {
   @override
   List<Object?> get props => [];
 }
 
-class LoadingNews extends NewsState {}
+class LoadingNewsState extends NewsState {}
 
-class ErrorReceivingData extends NewsState {
+class ErrorNews extends NewsState {
   final String message;
-
-  ErrorReceivingData({required this.message});
+  ErrorNews({required this.message});
 
   @override
   List<Object?> get props => [message];
@@ -20,9 +18,15 @@ class ErrorReceivingData extends NewsState {
 
 class SuccessNews extends NewsState {
   final List<ArticleModel> articles;
+  final List<String> categories;
+  final String selectedCategory;
 
-  SuccessNews({required this.articles});
+  SuccessNews({
+    required this.articles,
+    required this.categories,
+    required this.selectedCategory,
+  });
 
   @override
-  List<Object?> get props => [articles];
+  List<Object?> get props => [articles, categories, selectedCategory];
 }

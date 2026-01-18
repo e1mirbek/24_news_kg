@@ -14,12 +14,17 @@ class AppIconButton extends StatelessWidget {
         // Делаем эффект нажатия идеально круглым
         customBorder: const CircleBorder(),
         // Или настраиваем цвет всплеска (опционально)
-        splashColor: Colors.grey.withOpacity(0.2),
-        highlightColor: Colors.grey.withOpacity(0.1),
+        splashColor: Colors.white.withOpacity(0.2),
+        highlightColor: Colors.white.withOpacity(0.1),
         onTap: onPressed,
         child: Padding(
           padding: const EdgeInsets.all(14.0),
-          child: Image.asset(icon, width: 20.0, height: 20.0),
+          child: Image.asset(
+            icon,
+            width: 20.0,
+            height: 20.0,
+            color: AppColors.white,
+          ),
         ),
       ),
     );

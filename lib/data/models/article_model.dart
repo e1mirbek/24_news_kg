@@ -23,14 +23,15 @@ class ArticleModel {
       if (text == null) return ' ';
 
       return text
-          .replaceAll('&nbsp;', ' ')
-          .replaceAll('&laquo;', '«')
-          .replaceAll('&raquo;', '»')
-          .replaceAll('&mdash;', '—')
           .replaceAll(
-            RegExp(r'<[^>]*>'),
-            '',
-          ) // Убираем любые теги типа <br>, <p>
+            RegExp(r'&[a-z0-9#]+;', caseSensitive: false),
+            ' ',
+          ) // Удаляет все HTML-сущности
+          .replaceAll(RegExp(r'<[^>]*>'), '') // Удаляет теги
+          .replaceAll(
+            RegExp(r'\s+'),
+            ' ',
+          ) // Заменяет множественные пробелы и переносы на один пробел
           .trim();
     }
 
